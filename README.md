@@ -101,12 +101,12 @@ Or use the included scripts:
 
 ```bash
 # Check what's installed
-bash skills/apk-to-openapi/scripts/check-deps.sh
+bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/check-deps.sh
 
 # Install missing dependencies
-bash skills/apk-to-openapi/scripts/install-dep.sh java
-bash skills/apk-to-openapi/scripts/install-dep.sh jadx
-bash skills/apk-to-openapi/scripts/install-dep.sh hermes-dec
+bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/install-dep.sh java
+bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/install-dep.sh jadx
+bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/install-dep.sh hermes-dec
 ```
 
 ## Manual Usage
@@ -115,13 +115,13 @@ If you prefer to run the steps yourself instead of using `/extract-api`:
 
 ```bash
 # 1. Extract base APK from bundle
-BASE_APK=$(bash skills/apk-to-openapi/scripts/extract-apk.sh app.apkm)
+BASE_APK=$(bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/extract-apk.sh app.apkm)
 
 # 2. Decompile native code
 jadx -d app-decompiled --show-bad-code "$BASE_APK"
 
 # 3. Check for React Native / Hermes
-bash skills/apk-to-openapi/scripts/detect-hermes.sh app-decompiled
+bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/detect-hermes.sh app-decompiled
 # Output: HERMES:<path>, PLAINJS:<path>, or NONE
 
 # 4. Decompile Hermes bytecode (if detected)
@@ -133,7 +133,7 @@ grep -rn '@GET\|@POST\|@PUT\|@DELETE\|@PATCH' app-decompiled/sources/
 grep -rn 'BASE_URL\|API_URL\|Retrofit\.Builder' app-decompiled/sources/
 
 # 6. Search JS code for API endpoints
-bash skills/apk-to-openapi/scripts/find-js-api-calls.sh app-decompiled-js/index.js
+bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/find-js-api-calls.sh app-decompiled-js/index.js
 
 # 7. Validate the generated spec
 npx @redocly/cli lint openapi.yaml
@@ -176,19 +176,23 @@ npx @redocly/cli build-docs openapi.yaml -o docs.html
 ```
 apk-to-openapi/
 ├── README.md
-├── commands/
-│   └── extract-api.md                  # /extract-api command definition
-├── skills/
-│   └── apk-to-openapi/
-│       ├── SKILL.md                    # Full workflow documentation
-│       └── scripts/
-│           ├── check-deps.sh           # Verify dependencies
-│           ├── install-dep.sh          # Install missing deps
-│           ├── extract-apk.sh          # Extract base APK from bundles
-│           ├── detect-hermes.sh        # Detect Hermes bytecode
-│           └── find-js-api-calls.sh    # Extract JS API patterns
-└── .claude-plugin/
-    └── plugin.json                     # Plugin metadata
+├── .claude-plugin/
+│   └── marketplace.json                # Marketplace catalog
+└── plugins/
+    └── apk-to-openapi/
+        ├── .claude-plugin/
+        │   └── plugin.json             # Plugin metadata
+        ├── commands/
+        │   └── extract-api.md          # /extract-api command definition
+        └── skills/
+            └── apk-to-openapi/
+                ├── SKILL.md            # Full workflow documentation
+                └── scripts/
+                    ├── check-deps.sh       # Verify dependencies
+                    ├── install-dep.sh      # Install missing deps
+                    ├── extract-apk.sh      # Extract base APK from bundles
+                    ├── detect-hermes.sh    # Detect Hermes bytecode
+                    └── find-js-api-calls.sh # Extract JS API patterns
 ```
 
 ## License

@@ -174,9 +174,3 @@ fi
 
 echo
 echo "=== Search complete ==="
-echo
-echo "Next steps:"
-echo "  1. Read the API class definition section to find the method registry"
-echo "  2. Use the method names to search for their implementations"
-echo "  3. In each implementation, find the HTTP method (.get/.post etc.) and endpoint path"
-echo "  4. Note request body structure and query parameters"

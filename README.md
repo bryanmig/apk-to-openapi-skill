@@ -75,7 +75,11 @@ Claude walks through the full pipeline automatically:
 ### Native Layer (Java/Kotlin)
 
 - **Retrofit** annotations (`@GET`, `@POST`, `@PUT`, `@DELETE`, `@PATCH`) for endpoint definitions
-- Model classes with `@SerializedName` / `@Json` / `@Serializable` annotations for request/response schemas
+- **Volley** requests (`StringRequest`, `JsonObjectRequest`)
+- **OkHttp** raw usage (`Request.Builder`, `.newCall()`)
+- **Ktor** client calls (`client.get`, `client.post`)
+- **GraphQL** / Apollo Client queries and mutations
+- Model classes with `@SerializedName` / `@Json` / `@Serializable` / `@JsonProperty` annotations
 - Base URLs from `BuildConfig` or `Retrofit.Builder` calls
 - Auth interceptors (`Authorization`, `Bearer`, `Basic` headers)
 
@@ -111,35 +115,51 @@ bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/install-dep.sh hermes-
 
 ## Manual Usage
 
-If you prefer to run the steps yourself instead of using `/extract-api`:
+### One-shot pipeline (recommended)
+
+Run the full pipeline in a single command:
 
 ```bash
-# 1. Extract base APK from bundle
-BASE_APK=$(bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/extract-apk.sh app.apkm)
+bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/prepare.sh app.apkm
+```
 
-# 2. Decompile native code
+This handles everything: dependency checking, APK extraction, jadx decompilation, Hermes detection/decompilation, and native code scanning. It outputs a structured report listing all discovered API files, model classes, base URLs, and auth patterns.
+
+### Step-by-step
+
+If you prefer to run each step individually:
+
+```bash
+SCRIPTS=plugins/apk-to-openapi/skills/apk-to-openapi/scripts
+
+# 1. Check / install dependencies
+bash $SCRIPTS/check-deps.sh
+bash $SCRIPTS/install-dep.sh java     # if missing
+bash $SCRIPTS/install-dep.sh jadx     # if missing
+bash $SCRIPTS/install-dep.sh hermes-dec  # if missing
+
+# 2. Extract base APK from bundle
+BASE_APK=$(bash $SCRIPTS/extract-apk.sh app.apkm)
+
+# 3. Decompile native code
 jadx -d app-decompiled --show-bad-code "$BASE_APK"
 
-# 3. Check for React Native / Hermes
-bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/detect-hermes.sh app-decompiled
+# 4. Check for React Native / Hermes
+bash $SCRIPTS/detect-hermes.sh app-decompiled
 # Output: HERMES:<path>, PLAINJS:<path>, or NONE
 
-# 4. Decompile Hermes bytecode (if detected)
+# 5. Decompile Hermes bytecode (if detected)
 mkdir -p app-decompiled-js
 hbc-decompiler <bundle-path> app-decompiled-js/index.js
 
-# 5. Search native code for API endpoints
-grep -rn '@GET\|@POST\|@PUT\|@DELETE\|@PATCH' app-decompiled/sources/
-grep -rn 'BASE_URL\|API_URL\|Retrofit\.Builder' app-decompiled/sources/
-
 # 6. Search JS code for API endpoints
-bash plugins/apk-to-openapi/skills/apk-to-openapi/scripts/find-js-api-calls.sh app-decompiled-js/index.js
+bash $SCRIPTS/find-js-api-calls.sh app-decompiled-js/index.js
 
 # 7. Validate the generated spec
 npx @redocly/cli lint openapi.yaml
 ```
 
-### JS API Search Options
+### JS API search options
 
 The `find-js-api-calls.sh` script supports targeted searches:
 
@@ -188,6 +208,7 @@ apk-to-openapi/
             └── apk-to-openapi/
                 ├── SKILL.md            # Full workflow documentation
                 └── scripts/
+                    ├── prepare.sh          # One-shot pipeline (recommended)
                     ├── check-deps.sh       # Verify dependencies
                     ├── install-dep.sh      # Install missing deps
                     ├── extract-apk.sh      # Extract base APK from bundles

@@ -34,6 +34,7 @@ The script outputs a structured report. Parse these fields:
 | `BASE_URLS` section | Base URL configuration matches |
 | `AUTH_PATTERNS` section | Authentication pattern matches |
 | `GRAPHQL_FILES` section | Files using Apollo/GraphQL |
+| `CLEANUP` section | Temporary directories to delete when done |
 
 ## Step 2: Read API sources
 
@@ -128,6 +129,14 @@ npx @redocly/cli lint openapi.yaml
 
 Fix any errors. Warnings about missing `4XX` responses are acceptable.
 
-## Step 6: Report
+## Step 6: Clean up
+
+Delete all temporary directories listed in the `CLEANUP` section of the prepare.sh report. These include decompiled source trees, extracted APK bundles, and decompiled JS — which can be hundreds of megabytes. Only `openapi.yaml` needs to persist.
+
+```bash
+rm -rf <dir1> <dir2> ...
+```
+
+## Step 7: Report
 
 Summarize: total endpoints, functional areas/tags, auth method, base URL(s), validation status.

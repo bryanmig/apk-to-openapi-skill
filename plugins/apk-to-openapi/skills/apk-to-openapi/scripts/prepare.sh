@@ -26,6 +26,8 @@ fi
 INPUT_ABS=$(realpath "$INPUT")
 BASENAME=$(basename "$INPUT" | sed 's/\.[^.]*$//')
 WORK_DIR=$(pwd)
+CLEANUP_DIRS=()
+INPUT_EXT=$(echo "${INPUT_ABS##*.}" | tr '[:upper:]' '[:lower:]')
 
 # ─── Step 1: Check dependencies ─────────────────────────────────────
 echo ">>> Checking dependencies..."
@@ -43,10 +45,16 @@ echo ""
 echo ">>> Extracting base APK..."
 BASE_APK=$(bash "$SCRIPT_DIR/extract-apk.sh" "$INPUT_ABS")
 echo "Base APK: $BASE_APK"
+# Track extract directory if one was created (APKM/XAPK bundles)
+if [[ "$INPUT_EXT" == "apkm" || "$INPUT_EXT" == "xapk" ]]; then
+  EXTRACT_DIR="$(dirname "$INPUT_ABS")/${BASENAME}-extract"
+  [[ -d "$EXTRACT_DIR" ]] && CLEANUP_DIRS+=("$EXTRACT_DIR")
+fi
 echo ""
 
 # ─── Step 3: Decompile with jadx ────────────────────────────────────
 DECOMPILED_DIR="$WORK_DIR/${BASENAME}-decompiled"
+CLEANUP_DIRS+=("$DECOMPILED_DIR")
 if [[ -d "$DECOMPILED_DIR/sources" ]]; then
   echo ">>> Skipping jadx decompilation (already exists: $DECOMPILED_DIR)"
 else
@@ -64,6 +72,7 @@ if [[ "$HERMES_RESULT" == HERMES:* ]]; then
   BUNDLE_PATH="${HERMES_RESULT#HERMES:}"
   JS_DIR="$WORK_DIR/${BASENAME}-decompiled-js"
   JS_FILE="$JS_DIR/index.js"
+  CLEANUP_DIRS+=("$JS_DIR")
 
   if [[ -f "$JS_FILE" ]]; then
     echo ">>> Skipping Hermes decompilation (already exists: $JS_FILE)"
@@ -108,6 +117,11 @@ echo ""
 if [[ ! -d "$SOURCES_DIR" ]]; then
   echo "WARNING: No sources directory found at $SOURCES_DIR"
   echo "jadx may have failed. Check the decompiled directory."
+  echo ""
+  echo "--- CLEANUP ---"
+  for dir in "${CLEANUP_DIRS[@]}"; do
+    [[ -d "$dir" ]] && echo "$dir"
+  done
   echo ""
   echo "========================================"
   echo "DONE"
@@ -155,6 +169,11 @@ echo "--- GRAPHQL_FILES ---"
 grep -rl 'ApolloClient\|@GraphQL\|graphql\|\.query(\|\.mutate(' "$SOURCES_DIR" 2>/dev/null | head -20 || echo "(none)"
 echo ""
 
+echo "--- CLEANUP ---"
+for dir in "${CLEANUP_DIRS[@]}"; do
+  [[ -d "$dir" ]] && echo "$dir"
+done
+echo ""
 echo "========================================"
 echo "DONE"
 echo "========================================"

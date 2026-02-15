@@ -11,7 +11,7 @@ Handles both **native Android** apps (Java/Kotlin with Retrofit) and **React Nat
 Inside a Claude Code session, run the following slash commands:
 
 ```
-/plugin marketplace add bryanmig/apk-to-openapi
+/plugin marketplace add bryanmig/apk-to-openapi-skill
 /plugin install apk-to-openapi
 ```
 
@@ -35,7 +35,7 @@ Add the marketplace and enable the plugin directly in your `.claude/settings.jso
     "apk-to-openapi": {
       "source": {
         "source": "github",
-        "repo": "bryanmig/apk-to-openapi"
+        "repo": "bryanmig/apk-to-openapi-skill"
       }
     }
   },
@@ -50,7 +50,7 @@ Add the marketplace and enable the plugin directly in your `.claude/settings.jso
 Clone the repo and point Claude Code at it directly:
 
 ```bash
-git clone https://github.com/bryanmig/apk-to-openapi.git
+git clone https://github.com/bryanmig/apk-to-openapi-skill.git
 claude --plugin-dir ./apk-to-openapi
 ```
 

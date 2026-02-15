@@ -6,11 +6,51 @@ Handles both **native Android** apps (Java/Kotlin with Retrofit) and **React Nat
 
 ## Installation
 
-```bash
-# Install from GitHub
-claude plugin add github:bryanmig/apk-to-openapi
+### Option 1: Add via Claude Code (recommended)
 
-# Or test locally without installing
+Inside a Claude Code session, run the following slash commands:
+
+```
+/plugin marketplace add bryanmig/apk-to-openapi
+/plugin install apk-to-openapi
+```
+
+You can scope the install to your project (shared with your team via `.claude/settings.json`) or keep it user-level (personal):
+
+```
+# Project scope — committed to repo, shared with collaborators
+/plugin install apk-to-openapi --scope project
+
+# User scope — global, only on your machine (default)
+/plugin install apk-to-openapi --scope user
+```
+
+### Option 2: Manual settings.json
+
+Add the marketplace and enable the plugin directly in your `.claude/settings.json` (user-level) or your project's `.claude/settings.json`:
+
+```json
+{
+  "extraKnownMarketplaces": {
+    "apk-to-openapi": {
+      "source": {
+        "source": "github",
+        "repo": "bryanmig/apk-to-openapi"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "apk-to-openapi@apk-to-openapi": true
+  }
+}
+```
+
+### Option 3: Local development
+
+Clone the repo and point Claude Code at it directly:
+
+```bash
+git clone https://github.com/bryanmig/apk-to-openapi.git
 claude --plugin-dir ./apk-to-openapi
 ```
 

@@ -8,7 +8,7 @@ Handles both **native Android** apps (Java/Kotlin with Retrofit) and **React Nat
 
 ```bash
 # Install from GitHub
-claude plugin add github:bryanwhyte/apk-to-openapi
+claude plugin add github:bryanmig/apk-to-openapi
 
 # Or test locally without installing
 claude --plugin-dir ./apk-to-openapi
